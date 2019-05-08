@@ -1,14 +1,24 @@
-import React, { Component } from "react";
-import { View, StyleSheet } from "react-native";
-import CustomMap from "../CustomMap";
-import InputBox from "../InputBox";
+import React, { Component } from 'react';
+import { View, StyleSheet } from 'react-native';
+import CustomMap from '../CustomMap';
+import InputBox from '../InputBox';
 
 export default class Main extends Component {
+  state = {
+    item: null
+  };
+
+  updateItem = item => {
+    this.setState({ item });
+  };
+
   render() {
+    const { item } = this.state;
+
     return (
       <View style={styles.container}>
-        <CustomMap />
-        <InputBox />
+        <CustomMap item={item} />
+        <InputBox updateItem={this.updateItem} />
       </View>
     );
   }
@@ -17,7 +27,7 @@ export default class Main extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start"
+    alignItems: 'center',
+    justifyContent: 'flex-start'
   }
 });
