@@ -86,9 +86,9 @@ export default class CustomMap extends Component {
       });
 
       const edgePadding = {
-        top: 5,
+        top: 300,
         right: 50,
-        bottom: 5,
+        bottom: 50,
         left: 50
       };
 
@@ -101,13 +101,13 @@ export default class CustomMap extends Component {
       if (nextProps.item) {
         const markersArray = nextProps.item.location.map(place => (
           <Marker
-            key={place.id}
+            key={`${place.id}-${place.quantity === 0 ? 'n' : 'y'}`}
             id={place.id}
             coordinate={{
               latitude: place.latitude,
               longitude: place.longitude
             }}
-            pinColor={commonStyles.secondaryColor}>
+            pinColor={place.quantity === 0 ? 'tomato' : 'green'}>
             <Callout tooltip style={styles.customView}>
               <CustomCallout>
                 <Text style={{ color: '#333' }}>{place.nome}</Text>
