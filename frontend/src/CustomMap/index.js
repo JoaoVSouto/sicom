@@ -4,7 +4,6 @@ import {
   StyleSheet,
   PermissionsAndroid,
   ToastAndroid,
-  View,
   Text
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
@@ -21,7 +20,7 @@ const initialState = {
     latitudeDelta: 4.0143,
     longitudeDelta: 4.0134
   },
-  item: null
+  markersArray: null
 };
 
 export default class CustomMap extends Component {
@@ -78,19 +77,55 @@ export default class CustomMap extends Component {
   }
 
   componentDidUpdate() {
-    console.log(this.state);
+    if (this.state.markersArray) {
+      const coords = this.state.markersArray.map(marker => {
+        return {
+          latitude: marker.props.coordinate.latitude,
+          longitude: marker.props.coordinate.longitude
+        };
+      });
+
+      const edgePadding = {
+        top: 5,
+        right: 50,
+        bottom: 5,
+        left: 50
+      };
+
+      this.mapRef.fitToCoordinates(coords, { edgePadding });
+    }
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (prevState.item !== nextProps.item) {
-      return { item: nextProps.item };
+      if (nextProps.item) {
+        const markersArray = nextProps.item.location.map(place => (
+          <Marker
+            key={place.id}
+            id={place.id}
+            coordinate={{
+              latitude: place.latitude,
+              longitude: place.longitude
+            }}
+            pinColor={commonStyles.secondaryColor}>
+            <Callout tooltip style={styles.customView}>
+              <CustomCallout>
+                <Text style={{ color: '#333' }}>{place.nome}</Text>
+              </CustomCallout>
+            </Callout>
+          </Marker>
+        ));
+        return { markersArray: markersArray };
+      } else {
+        return null;
+      }
     } else {
       return null;
     }
   }
 
   render() {
-    const { region, item } = this.state;
+    const { region, markersArray } = this.state;
 
     return (
       <MapView
@@ -99,24 +134,9 @@ export default class CustomMap extends Component {
         showsMyLocationButton={false}
         loadingEnabled
         style={styles.mapView}
-        region={region}>
-        {item
-          ? item.location.map(place => (
-              <Marker
-                key={place.id}
-                coordinate={{
-                  latitude: place.latitude,
-                  longitude: place.longitude
-                }}
-                pinColor={commonStyles.secondaryColor}>
-                <Callout tooltip style={styles.customView}>
-                  <CustomCallout>
-                    <Text style={{ color: '#333' }}>{place.nome}</Text>
-                  </CustomCallout>
-                </Callout>
-              </Marker>
-            ))
-          : null}
+        region={region}
+        ref={ref => (this.mapRef = ref)}>
+        {markersArray}
       </MapView>
     );
   }
