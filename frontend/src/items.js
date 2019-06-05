@@ -139,7 +139,7 @@ export default [
         ]
       },
       {
-        name: 'CLORIDRATO DE METFORMINA +GLIBENCAMIDA',
+        name: 'CLORIDRATO DE METFORMINA',
         id: 11,
         location: [
           { ...postosDeSaude.pontaNegra, quantity: 0 },

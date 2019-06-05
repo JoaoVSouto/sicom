@@ -2,23 +2,45 @@ import React, { Component } from 'react';
 import { View, StyleSheet } from 'react-native';
 import CustomMap from '../CustomMap';
 import InputBox from '../InputBox';
+import MainModal from '../MainModal';
+import RequirementsModal from '../RequirementsModal';
 
 export default class Main extends Component {
   state = {
-    item: null
+    item: null,
+    info: null,
+    openModal: false
   };
 
   updateItem = item => {
     this.setState({ item });
   };
 
+  calloutPressed = info => {
+    this.setState({ info });
+  };
+
+  attModal = openModal => {
+    this.setState({ openModal });
+  };
+
+  attInfo = () => {
+    this.setState({ info: null });
+  };
+
   render() {
-    const { item } = this.state;
+    const { item, info, openModal } = this.state;
 
     return (
       <View style={styles.container}>
-        <CustomMap item={item} />
+        <CustomMap item={item} calloutPressed={this.calloutPressed} />
         <InputBox updateItem={this.updateItem} />
+        <MainModal
+          info={info}
+          attInfo={this.attInfo}
+          attModal={this.attModal}
+        />
+        <RequirementsModal openModal={openModal} attModal={this.attModal} />
       </View>
     );
   }
