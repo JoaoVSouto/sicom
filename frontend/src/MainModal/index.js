@@ -3,16 +3,37 @@ import { View, StyleSheet, Text } from 'react-native';
 import Modal from 'react-native-modalbox';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import ButtonComponent from 'react-native-button-component';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class MainModal extends Component {
   state = {
-    buttonState: 'save',
-    info: null
+    info: null,
+    buttonState: 'save'
   };
+
+  // TODO: renderizar o asyncstorage toda vez q o modal for aberto
+  // USAR O ASYNCSTORAGE NO MAIN QUANDO O CALLOUT FOR APERTADO
+  // LER TUDO E MANDAR COMO PROP PRA CÁ
+  async componentDidMount() {
+    const data = await AsyncStorage.getItem('items');
+    const items = JSON.parse(data) || [];
+    this.setState({ items });
+  }
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (prevState.info !== nextProps.info) {
-      return { info: nextProps.info };
+      let buttonState = 'save';
+
+      if (nextProps.info) {
+        if (prevState.items.find(item => item === nextProps.info.itemName)) {
+          buttonState += 'd';
+        }
+      }
+
+      return {
+        info: nextProps.info,
+        buttonState: buttonState
+      };
     } else {
       return null;
     }
@@ -25,7 +46,7 @@ export default class MainModal extends Component {
   }
 
   render() {
-    const { info } = this.state;
+    const { info, buttonState, items } = this.state;
 
     return (
       <Modal
@@ -33,9 +54,7 @@ export default class MainModal extends Component {
         position={'center'}
         backButtonClose={true}
         ref={'modal'}
-        onClosed={() => {
-          this.props.attInfo();
-        }}>
+        onClosed={() => this.props.attInfo()}>
         {info ? (
           <React.Fragment>
             <Text style={styles.title}>Posto médco:</Text>
@@ -71,17 +90,38 @@ export default class MainModal extends Component {
                 height={40}
                 width={120}
                 style={{ marginRight: 5 }}
-                buttonState={this.state.buttonState}
+                buttonState={buttonState}
                 states={{
                   save: {
                     onPress: () => {
-                      this.setState({ buttonState: 'saved' });
+                      const itemsState = [...items, info.itemName];
+                      this.setState(
+                        { buttonState: 'saved', items: itemsState },
+                        () => {
+                          AsyncStorage.setItem(
+                            'items',
+                            JSON.stringify(itemsState)
+                          );
+                        }
+                      );
                     },
                     text: 'Salvar'
                   },
                   saved: {
                     onPress: () => {
-                      this.setState({ buttonState: 'save' });
+                      const itemsState = [...items];
+                      const newItems = itemsState.filter(
+                        item => item !== info.itemName
+                      );
+                      this.setState(
+                        { buttonState: 'save', items: newItems },
+                        () => {
+                          AsyncStorage.setItem(
+                            'items',
+                            JSON.stringify(newItems)
+                          );
+                        }
+                      );
                     },
                     text: 'Salvo!'
                   }

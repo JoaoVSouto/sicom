@@ -30,11 +30,16 @@ export default class Main extends Component {
 
   render() {
     const { item, info, openModal } = this.state;
+    const name = this.props.navigation.getParam('name', null);
 
     return (
       <View style={styles.container}>
         <CustomMap item={item} calloutPressed={this.calloutPressed} />
-        <InputBox updateItem={this.updateItem} />
+        <InputBox
+          updateItem={this.updateItem}
+          openDrawer={this.props.navigation.openDrawer}
+          searchName={name}
+        />
         <MainModal
           info={info}
           attInfo={this.attInfo}

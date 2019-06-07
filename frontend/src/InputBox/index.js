@@ -4,11 +4,43 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 import commonStyles from '../commonStyles';
 import items from '../items';
+import { NavigationEvents } from 'react-navigation';
+
+let counter = 0; // desperate times require desperate measures
 
 export default class InputBox extends Component {
   state = {
-    item: null
+    item: null,
+    lastSearched: null
   };
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (
+      nextProps.searchName !== prevState.item &&
+      nextProps.searchName !== prevState.lastSearched
+    ) {
+      return { item: nextProps.searchName, lastSearched: nextProps.searchName };
+    }
+    return null;
+  }
+
+  componentDidUpdate() {
+    if (this.state.item) {
+      const item = items[0].children.find(
+        item => item.name === this.state.item
+      );
+      this.props.updateItem(item);
+    }
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    ++counter;
+    if (counter > 3) {
+      counter = 0;
+      return false;
+    }
+    return true;
+  }
 
   onSelectedItemsChange = selectedItems => {
     const item = items[0].children.find(elem => elem.id === selectedItems[0]);
@@ -28,7 +60,17 @@ export default class InputBox extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Icon name="bars" size={20} style={{ marginLeft: 15 }} />
+        <NavigationEvents
+          onDidBlur={() => {
+            this.setState({ lastSearched: null });
+          }}
+        />
+        <Icon
+          name="bars"
+          size={20}
+          style={{ marginLeft: 15 }}
+          onPress={this.props.openDrawer}
+        />
         <View
           style={styles.inputContainer}
           onTouchEnd={() => this.SectionedMultiSelect._toggleSelector()}>

@@ -86,7 +86,7 @@ export default class CustomMap extends Component {
         };
       });
       const edgePadding = {
-        top: 300,
+        top: 500,
         right: 50,
         bottom: 50,
         left: 50
